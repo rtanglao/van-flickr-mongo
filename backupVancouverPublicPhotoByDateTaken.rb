@@ -82,11 +82,21 @@ while min_taken_date < MAX_DATE
     $stderr.printf("STATUS from flickr API:%s retrieved page:%d of:%d\n", photos_on_this_page["stat"],
       photos_on_this_page["photos"]["page"].to_i, photos_on_this_page["photos"]["pages"].to_i)
     photos_on_this_page["photos"]["photo"].each do|photo|
-      datetaken = Time.parse(photo["datetaken"])
+      begin
+        datetaken = Time.parse(photo["datetaken"])
+      rescue ArgumentError
+        $stderr.printf("skipping photo id:%s because of invalid datetaken:%s\n", photo["id"], photo["datetaken"])
+        next
+      end
       datetaken = datetaken.utc
       $stderr.printf("PHOTO datetaken:%s\n", datetaken)
       photo["datetaken"] = datetaken
-      dateupload = Time.at(photo["dateupload"].to_i)
+      begin 
+        dateupload = Time.at(photo["dateupload"].to_i)
+      rescue ArgumentError
+        $stderr.printf("skipping photo id:%s because of invalid dateupload:%s\n", photo["id"], photo["dateupload"])
+        next
+      end
       $stderr.printf("PHOTO dateupload:%s\n", dateupload)
       photo["dateupload"] = dateupload
       lastupdate = Time.at(photo["lastupdate"].to_i)

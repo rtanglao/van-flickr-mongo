@@ -4,5 +4,13 @@ require 'nestful'
 
 def getFlickrResponse(url, params)
   url = "api.flickr.com/" + url
-  return Nestful.get url, :format => :json, :params => params
+  retried = false
+  begin
+    return Nestful.get url, :format => :json, :params => params
+  rescue Nestful::ServerError
+    if !retried
+      retried = true
+      retry
+    end
+  end
 end
